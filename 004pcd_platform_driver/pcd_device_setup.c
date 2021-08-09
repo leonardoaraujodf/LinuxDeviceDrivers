@@ -11,10 +11,12 @@ void pcdev_release(struct device *dev);
 struct pcdev_platform_data  pcdev_pdata[] = {
 	[0] = {.size = 512, .perm = RDWR, .serial_number = "PCDEVABC1111"},
 	[1] = {.size = 1024,.perm = RDWR, .serial_number = "PCDEVXYZ2222"},
+	[2] = {.size = 1024,.perm = RDONLY, .serial_number = "PCDEVXYZ3333"},
+	[3] = {.size = 1024,.perm = WRONLY, .serial_number = "PCDEVXYZ4444"},
 };
 
 struct platform_device platform_pcdev_1 = {
-	.name = "pseudo-char-device",
+	.name = "pcdev-A1x",
 	.id = 0,
 	.dev = {
 		.platform_data = &pcdev_pdata[0],
@@ -23,12 +25,37 @@ struct platform_device platform_pcdev_1 = {
 };
 
 struct platform_device platform_pcdev_2 = {
-	.name = "pseudo-char-device",
+	.name = "pcdev-B1x",
 	.id = 1,
 	.dev = {
 		.platform_data = &pcdev_pdata[1],
 		.release = pcdev_release,
 	},
+};
+
+struct platform_device platform_pcdev_3 = {
+	.name = "pcdev-C1x",
+	.id = 2,
+	.dev = {
+		.platform_data = &pcdev_pdata[2],
+		.release = pcdev_release,
+	},
+};
+
+struct platform_device platform_pcdev_4 = {
+	.name = "pcdev-D1x",
+	.id = 3,
+	.dev = {
+		.platform_data = &pcdev_pdata[3],
+		.release = pcdev_release,
+	},
+};
+
+struct platform_device * platform_pcdevs[] = {
+	&platform_pcdev_1,
+	&platform_pcdev_2,
+	&platform_pcdev_3,
+	&platform_pcdev_4
 };
 
 void pcdev_release(struct device *dev)
@@ -39,8 +66,7 @@ void pcdev_release(struct device *dev)
 
 static int __init pcdev_platform_init(void)
 {
-	platform_device_register(&platform_pcdev_1);
-	platform_device_register(&platform_pcdev_2);
+	platform_add_devices(platform_pcdevs, ARRAY_SIZE(platform_pcdevs));
 
 	pr_info("Device setup module loaded");
 
@@ -51,6 +77,8 @@ static void __exit pcdev_platform_exit(void)
 {
 	platform_device_unregister(&platform_pcdev_1);
 	platform_device_unregister(&platform_pcdev_2);
+	platform_device_unregister(&platform_pcdev_3);
+	platform_device_unregister(&platform_pcdev_4);
 
 	pr_info("Device setup module unloaded");
 }
